@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kurtis & Elena — Five Years Together</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400;500&display=swap');
+
+  :root {
+    --bg:        #f7f7f5;
+    --surface:   #ffffff;
+    --text:      #2c2c2c;
+    --subtle:    #7a7a7a;
+    --muted:     #b0aca6;
+    --accent:    #8c7b6b;
+    --accent-lt: #c4b5a4;
+    --border:    #e8e6e2;
+    --radius:    10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  /* ────── INTRO ────── */
+  #intro {
+    position: fixed; inset:0; z-index: 9000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg);
+    transition: opacity .9s cubic-bezier(.4,0,.2,1), visibility .9s;
+  }
+  #intro.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+
+  .intro-line { width:48px; height:1px; background: var(--muted); margin-bottom:2rem; }
+
+  #intro h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 300; font-size: clamp(2rem,6vw,3.6rem);
+    text-align: center; line-height:1.25; letter-spacing:-.02em;
+  }
+  #intro h1 .amp {
+    display: block; font-style: italic;
+    font-size: .5em; color: var(--accent); margin: .3rem 0;
+  }
+
+  #intro .tagline {
+    margin-top: 1.4rem;
+    font-weight: 300; font-size: .85rem;
+    letter-spacing: .22rem; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  #intro .date-badge {
+    margin-top: .6rem;
+    font-weight: 300; font-size: .75rem;
+    color: var(--accent-lt); letter-spacing: .1rem;
+  }
+
+  .enter-btn {
+    margin-top: 3rem; padding: .75rem 2.6rem;
+    border: 1px solid var(--border); border-radius: 50px;
+    background: var(--surface); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: .75rem; font-weight: 400;
+    letter-spacing: .18rem; text-transform: uppercase;
+    cursor: pointer; transition: all .3s ease;
+  }
+  .enter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ────── APP SHELL ────── */
+  #app {
+    display: none; flex-direction: column;
+    min-height: 100dvh;
+  }
+  #app.visible { display: flex; }
+
+  /* ────── TOP BAR ────── */
+  .top-bar {
+    display: flex; align-items: center; justify-content: center;
+    gap: .4rem; padding: 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(247,247,245,.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top:0; z-index: 200;
+  }
+
+  .home-btn {
+    position: absolute; left: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: .85rem; font-weight: 300;
+    color: var(--muted); cursor: pointer;
+    background: none; border: none;
+    transition: color .25s ease;
+    letter-spacing: .02em;
+  }
+  .home-btn:hover { color: var(--accent); }
+
+  .yr-pill {
+    font-family: 'Inter', sans-serif;
+    font-size: .68rem; font-weight: 400;
+    letter-spacing: .1rem; text-transform: uppercase;
+    padding: .5rem 1.15rem; border-radius: 50px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--subtle); cursor: pointer;
+    transition: all .25s ease;
+  }
+  .yr-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .yr-pill.active {
+    background: var(--text); border-color: var(--text);
+    color: #fff;
+  }
+
+  /* ────── SLIDE AREA ────── */
+  .slide-area {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem 1.5rem;
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .year-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 300; font-size: clamp(1.5rem,4vw,2.2rem);
+    margin-bottom: .25rem;
+  }
+  .year-sub {
+    font-size: .75rem; color: var(--muted);
+    letter-spacing: .12rem; margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  /* Anniversary hero */
+  .hero-wrap {
+    width: 100%; max-width: 380px;
+    aspect-ratio: 3/4;
+    border-radius: var(--radius); overflow: hidden;
+    cursor: pointer; position: relative;
+    box-shadow: 0 6px 28px rgba(0,0,0,.08);
+    margin-bottom: 1.6rem;
+    transition: transform .35s ease;
+  }
+  .hero-wrap:hover { transform: scale(1.015); }
+  .hero-wrap img, .hero-wrap .ph {
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .hero-badge {
+    position: absolute; bottom:0; left:0; right:0;
+    padding: 2.4rem 1rem .8rem;
+    background: linear-gradient(transparent, rgba(0,0,0,.4));
+    color: #fff; text-align: center;
+    font-size: .72rem; letter-spacing: .14rem;
+    font-weight: 400;
+  }
+
+  /* Photo strip */
+  .strip {
+    display: flex; gap: .65rem;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 0 1rem .5rem;
+    max-width: 800px; width: 100%;
+    scrollbar-width: none;
+  }
+  .strip::-webkit-scrollbar { display:none; }
+
+  .strip-card {
+    flex: 0 0 130px; aspect-ratio: 3/4;
+    border-radius: 8px; overflow: hidden;
+    cursor: pointer; position: relative;
+    scroll-snap-align: center;
+    box-shadow: 0 3px 14px rgba(0,0,0,.07);
+    transition: transform .3s ease;
+  }
+  .strip-card:hover { transform: translateY(-3px); }
+  .strip-card img, .strip-card .ph {
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .strip-num {
+    position: absolute; bottom: .45rem; right: .5rem;
+    font-size: .55rem; font-weight: 500;
+    color: rgba(255,255,255,.85);
+    background: rgba(0,0,0,.25);
+    padding: .15rem .45rem; border-radius: 20px;
+  }
+
+  .scroll-hint {
+    font-size: .65rem; color: var(--muted);
+    margin-top: .6rem; letter-spacing: .08rem;
+    display: none;
+  }
+
+  /* prev / next arrows */
+  .slide-nav {
+    display: flex; gap: 1rem; margin-top: 2rem;
+    align-items: center;
+  }
+  .nav-arrow {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem; color: var(--subtle);
+    transition: all .25s ease;
+  }
+  .nav-arrow:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-arrow:disabled { opacity:.25; cursor:default; }
+  .nav-dots { display: flex; gap: .4rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border); transition: all .3s ease;
+  }
+  .dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+
+  /* ────── CLOSING SLIDE ────── */
+  .closing {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 4rem 2rem;
+    min-height: 60dvh;
+    text-align: center;
+  }
+  .closing-line { width: 36px; height: 1px; background: var(--muted); margin-bottom: 2.5rem; }
+  .closing h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 300; font-size: clamp(1.6rem,5vw,2.6rem);
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .closing .sig {
+    margin-top: 1.8rem;
+    font-size: .85rem; font-weight: 300;
+    color: var(--accent); letter-spacing: .08rem;
+  }
+
+  /* ────── MODAL ────── */
+  .modal-bg {
+    position: fixed; inset:0; z-index: 8000;
+    background: rgba(0,0,0,.8);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    opacity:0; visibility:hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+  }
+  .modal-bg.open { opacity:1; visibility:visible; }
+
+  .modal-card {
+    background: var(--surface); border-radius: 12px;
+    max-width: 440px; width: 100%;
+    max-height: 90dvh; overflow-y: auto;
+    transform: translateY(16px) scale(.97);
+    transition: transform .35s ease;
+  }
+  .modal-bg.open .modal-card { transform: translateY(0) scale(1); }
+
+  .modal-card img, .modal-card .ph-modal {
+    width: 100%; aspect-ratio: 3/4;
+    object-fit: cover; display: block;
+    border-radius: 12px 12px 0 0;
+  }
+  .modal-body { padding: 1.4rem 1.6rem 1.6rem; }
+  .modal-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400; font-size: 1.15rem;
+    margin-bottom: .45rem;
+  }
+  .modal-body p {
+    font-weight: 300; font-size: .85rem;
+    line-height: 1.75; color: var(--subtle);
+  }
+
+  .modal-x {
+    position: fixed; top: .8rem; right: 1rem; z-index: 8100;
+    width: 40px; height: 40px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,.15);
+    color: #fff; font-size: 1.3rem; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-bg.open ~ .modal-x { display:flex; }
+
+  /* ────── FOOTER ────── */
+  .footer {
+    text-align:center; padding: 1.4rem;
+    font-size: .65rem; color: var(--muted); letter-spacing:.08rem;
+  }
+
+  /* ────── PLACEHOLDER BLOCKS ────── */
+  .ph {
+    background: linear-gradient(135deg, #e2ddd6 0%, #d4cec5 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: .7rem; letter-spacing: .08rem;
+  }
+  .ph-modal {
+    background: linear-gradient(135deg, #e2ddd6 0%, #d4cec5 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: .85rem; letter-spacing: .08rem;
+  }
+
+  /* ────── RESPONSIVE ────── */
+  @media (max-width: 600px) {
+    .yr-pill { font-size: .6rem; padding: .4rem .8rem; }
+    .hero-wrap { max-width: 280px; }
+    .strip-card { flex: 0 0 110px; }
+    .scroll-hint { display: block; }
+    .home-btn { position: static; margin-right: .5rem; }
+  }
+  @media (min-width: 601px) {
+    .strip { justify-content: center; overflow-x: visible; }
+    .strip-card { flex: 0 0 150px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ INTRO ══════ -->
+<div id="intro">
+  <div class="intro-line"></div>
+  <h1>
+    Kurtis
+    <span class="amp">&</span>
+    Elena
+  </h1>
+  <div class="tagline">Five Years Together</div>
+  <div class="date-badge">May 18, 2021 — May 18, 2026</div>
+  <button class="enter-btn" onclick="enterSite()">My Top 5 of Each 5</button>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="app">
+  <nav class="top-bar" id="topBar">
+    <button class="home-btn" onclick="goHome()" title="Back to start">K &amp; E</button>
+  </nav>
+  <div class="slide-area" id="slideArea"></div>
+  <div class="footer">Made with love — Kurtis</div>
+</div>
+
+<!-- ══════ MODAL ══════ -->
+<div class="modal-bg" id="modal" onclick="closeModal(event)">
+  <div class="modal-card" id="modalCard" onclick="event.stopPropagation()">
+    <div class="ph-modal" id="modalImg" style="display:none"></div>
+    <img id="modalImgReal" src="" alt="" style="display:none">
+    <div class="modal-body">
+      <h3 id="modalTitle"></h3>
+      <p  id="modalDesc"></p>
+    </div>
+  </div>
+</div>
+<button class="modal-x" id="modalX" onclick="closeModal()">&#x2715;</button>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   📸  YOUR DATA — EDIT THIS SECTION
+   ═══════════════════════════════════════════════════════ */
+const YEARS = [
+  {
+    year: 1,
+    label: "Year One",
+    subtitle: "Honeymooning",
+    anniversary: {
+      src:   "photos/year1/anniversary.jpeg",
+      title: "May 18, 2021",
+      desc:  "Write your description here..."
+    },
+    photos: [
+      { src: "photos/year1/01.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year1/02.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year1/03.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year1/04.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year1/05.jpeg", title: "Photo Title", desc: "Your description here..." }
+    ]
+  },
+  {
+    year: 2,
+    label: "Year Two",
+    subtitle: "Becoming Parents",
+    anniversary: {
+      src:   "photos/year2/anniversary.jpeg",
+      title: "May 18, 2022",
+      desc:  "Write your description here..."
+    },
+    photos: [
+      { src: "photos/year2/01.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year2/02.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year2/03.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year2/04.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year2/05.jpeg", title: "Photo Title", desc: "Your description here..." }
+    ]
+  },
+  {
+    year: 3,
+    label: "Year Three",
+    subtitle: "Adulting",
+    anniversary: {
+      src:   "photos/year3/anniversary.jpeg",
+      title: "May 18, 2023",
+      desc:  "Write your description here..."
+    },
+    photos: [
+      { src: "photos/year3/01.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year3/02.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year3/03.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year3/04.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year3/05.jpeg", title: "Photo Title", desc: "Your description here..." }
+    ]
+  },
+  {
+    year: 4,
+    label: "Year Four",
+    subtitle: "Moving to the Midwest",
+    anniversary: {
+      src:   "photos/year4/anniversary.jpeg",
+      title: "May 18, 2024",
+      desc:  "Write your description here..."
+    },
+    photos: [
+      { src: "photos/year4/01.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year4/02.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year4/03.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year4/04.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year4/05.jpeg", title: "Photo Title", desc: "Your description here..." }
+    ]
+  },
+  {
+    year: 5,
+    label: "Year Five",
+    subtitle: "Just When We Thought We Had It, Add Another",
+    anniversary: {
+      src:   "photos/year5/anniversary.jpeg",
+      title: "May 18, 2025",
+      desc:  "Write your description here..."
+    },
+    photos: [
+      { src: "photos/year5/01.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year5/02.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year5/03.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year5/04.jpeg", title: "Photo Title", desc: "Your description here..." },
+      { src: "photos/year5/05.jpeg", title: "Photo Title", desc: "Your description here..." }
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════════════════════
+   ENGINE — no edits needed below
+   ═══════════════════════════════════════════════════════ */
+const TOTAL_SLIDES = YEARS.length + 1;
+let current = 0;
+const USE_PLACEHOLDERS = true;  // ← set to false once you add real photos
+
+const topBar    = document.getElementById('topBar');
+const slideArea = document.getElementById('slideArea');
+const modal     = document.getElementById('modal');
+const modalX    = document.getElementById('modalX');
+
+// Build nav pills
+YEARS.forEach((yr, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'yr-pill' + (i === 0 ? ' active' : '');
+  btn.textContent = yr.label;
+  btn.addEventListener('click', () => goTo(i));
+  topBar.appendChild(btn);
+});
+
+function goTo(idx) {
+  if (idx < 0 || idx >= TOTAL_SLIDES) return;
+  current = idx;
+  render();
+}
+
+function goHome() {
+  document.getElementById('app').classList.remove('visible');
+  const intro = document.getElementById('intro');
+  intro.classList.remove('hidden');
+}
+
+function render() {
+  document.querySelectorAll('.yr-pill').forEach((b,i) =>
+    b.classList.toggle('active', i === current)
+  );
+
+  slideArea.innerHTML = '';
+  slideArea.style.animation = 'none';
+  void slideArea.offsetHeight;
+  slideArea.style.animation = 'fadeUp .45s ease both';
+
+  // ── Closing slide ──
+  if (current >= YEARS.length) {
+    document.querySelectorAll('.yr-pill').forEach(b => b.classList.remove('active'));
+
+    const closing = document.createElement('div');
+    closing.className = 'closing';
+    closing.innerHTML = `
+      <div class="closing-line"></div>
+      <h2>I love you.<br>Looking forward to the next 5 too.</h2>
+      <div class="sig">— Kurtis</div>
+    `;
+    slideArea.appendChild(closing);
+
+    const nav = document.createElement('div');
+    nav.className = 'slide-nav';
+    const prev = document.createElement('button');
+    prev.className = 'nav-arrow';
+    prev.innerHTML = '&#8592;';
+    prev.onclick = () => goTo(current - 1);
+
+    const dots = document.createElement('div');
+    dots.className = 'nav-dots';
+    for (let i = 0; i < TOTAL_SLIDES; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === current ? ' active' : '');
+      dots.appendChild(d);
+    }
+
+    const next = document.createElement('button');
+    next.className = 'nav-arrow';
+    next.innerHTML = '&#8594;';
+    next.disabled = true;
+
+    nav.append(prev, dots, next);
+    slideArea.appendChild(nav);
+    return;
+  }
+
+  // ── Year slide ──
+  const yr = YEARS[current];
+
+  const hdr = document.createElement('div');
+  hdr.style.textAlign = 'center';
+  hdr.innerHTML = `<div class="year-title">${yr.label}</div>
+                   <div class="year-sub">${yr.subtitle}</div>`;
+  slideArea.appendChild(hdr);
+
+  const hero = document.createElement('div');
+  hero.className = 'hero-wrap';
+  hero.onclick = () => openModal(yr.anniversary.src, yr.anniversary.title, yr.anniversary.desc);
+  if (USE_PLACEHOLDERS) {
+    hero.innerHTML = `<div class="ph">anniversary photo</div>
+                      <div class="hero-badge">${yr.anniversary.title}</div>`;
+  } else {
+    hero.innerHTML = `<img src="${yr.anniversary.src}" alt="${yr.anniversary.title}" loading="lazy">
+                      <div class="hero-badge">${yr.anniversary.title}</div>`;
+  }
+  slideArea.appendChild(hero);
+
+  const strip = document.createElement('div');
+  strip.className = 'strip';
+  yr.photos.forEach((p, j) => {
+    const card = document.createElement('div');
+    card.className = 'strip-card';
+    card.onclick = () => openModal(p.src, p.title, p.desc);
+    if (USE_PLACEHOLDERS) {
+      card.innerHTML = `<div class="ph">0${j+1}</div>
+                        <div class="strip-num">${j+1}</div>`;
+    } else {
+      card.innerHTML = `<img src="${p.src}" alt="${p.title}" loading="lazy">
+                        <div class="strip-num">${j+1}</div>`;
+    }
+    strip.appendChild(card);
+  });
+  slideArea.appendChild(strip);
+
+  const hint = document.createElement('div');
+  hint.className = 'scroll-hint';
+  hint.textContent = 'swipe to see more →';
+  slideArea.appendChild(hint);
+
+  const nav = document.createElement('div');
+  nav.className = 'slide-nav';
+
+  const prev = document.createElement('button');
+  prev.className = 'nav-arrow';
+  prev.innerHTML = '&#8592;';
+  prev.disabled = current === 0;
+  prev.onclick = () => goTo(current - 1);
+
+  const dots = document.createElement('div');
+  dots.className = 'nav-dots';
+  for (let i = 0; i < TOTAL_SLIDES; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === current ? ' active' : '');
+    dots.appendChild(d);
+  }
+
+  const next = document.createElement('button');
+  next.className = 'nav-arrow';
+  next.innerHTML = '&#8594;';
+  next.onclick = () => goTo(current + 1);
+
+  nav.append(prev, dots, next);
+  slideArea.appendChild(nav);
+}
+
+// Modal
+function openModal(src, title, desc) {
+  const imgReal = document.getElementById('modalImgReal');
+  const imgPH   = document.getElementById('modalImg');
+  if (USE_PLACEHOLDERS) {
+    imgPH.style.display = 'flex';
+    imgPH.textContent = 'your photo here';
+    imgReal.style.display = 'none';
+  } else {
+    imgReal.src = src;
+    imgReal.style.display = 'block';
+    imgPH.style.display = 'none';
+  }
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalDesc').textContent  = desc;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(e) {
+  if (e && e.target !== modal && e.target !== modalX) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive:true });
+document.addEventListener('touchend', e => {
+  if (modal.classList.contains('open')) return;
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0) goTo(current + 1);
+    else goTo(current - 1);
+  }
+}, { passive:true });
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (modal.classList.contains('open')) return;
+  if (e.key === 'ArrowRight') goTo(current + 1);
+  if (e.key === 'ArrowLeft')  goTo(current - 1);
+});
+
+// Intro
+function enterSite() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  render();
+}
+</script>
+</body>
+</html>
